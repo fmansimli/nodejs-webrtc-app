@@ -20,8 +20,6 @@ app.use(morgan("dev"));
 app.use(cors({ origin: ["*"], optionsSuccessStatus: 200 }));
 
 app.use("/api", indexRouter);
-app.use("/", (req, res) => res.sendFile("/index.html"));
-
 app.use(catch404);
 app.use(catchError);
 

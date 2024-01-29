@@ -11,7 +11,8 @@
     "move-folders": "mv ./webui/dist ./dist/public",
     "build": "npm run pre:build && npm run move-folders",
     "serve": "node ./dist/src/index.js",
-    "serve:pm2": "pm2-runtime start ./dist/src/index.js"
+    "serve:pm2": "pm2 start ./dist/src/index.js",
+    "serve:pm2:runtime": "pm2-runtime start ./dist/src/index.js"
   },
   "keywords": [
     "webrtc",

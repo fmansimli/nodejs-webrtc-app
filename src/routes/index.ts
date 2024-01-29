@@ -5,7 +5,7 @@ import admin from "./admin";
 
 const router = Router();
 
-router.use("/", apiv1);
+router.use("/v1", apiv1);
 router.use("/admin", admin);
 
 export default router;

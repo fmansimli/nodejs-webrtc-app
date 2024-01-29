@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Spinner from "../components/ui/Spinner";
 import * as rtcSocket from "../sockets/webrtc.socket";
@@ -30,7 +30,6 @@ const PreviewPage = () => {
     }
 
     try {
-      //await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
       setIsSearching(true);
       rtcSocket.joinGlobal();
     } catch (error: any) {
@@ -45,6 +44,9 @@ const PreviewPage = () => {
         <button onClick={searchOrCancel} className="rounded-md bg-amber-600 px-5 py-3">
           {isSearching ? "Cancel" : "search in global"}
         </button>
+        <Link className="text-blue-500" to="/">
+          Go Home
+        </Link>
       </div>
     </div>
   );

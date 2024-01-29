@@ -1,9 +1,10 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { CustomError } from "../errors/custom-error";
+import { join } from "path";
 
-export const catch404: RequestHandler = (req, res, next) => {
+export const catch404: RequestHandler = async (req, res, next) => {
   try {
-    res.status(404).sendFile("/index.html");
+    res.status(404).sendFile(join(process.cwd(), "./dist/public/index.html"));
   } catch (error) {
     next(error);
   }
