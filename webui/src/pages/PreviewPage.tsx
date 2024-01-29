@@ -10,7 +10,7 @@ const PreviewPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    rtcSocket.initWebRTC("access token");
+    rtcSocket.initWebRTC(import.meta.env.VITE_EXAMPLE_TOKEN);
   }, []);
 
   useEffect(() => {
