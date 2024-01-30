@@ -8,7 +8,6 @@ webui/
 .prettierignore
 .prettierrc
 .dockerignore
-.env
 
 nodemon.json
 environments.d.ts
