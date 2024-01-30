@@ -2,23 +2,23 @@
   "name": "nodejs-webrtc-app",
   "version": "1.0.0",
   "description": "nodejs app for webrtc",
-  "main": "./dist/index.js",
+  "main": "./prod/index.js",
   "engines": {
     "node": "20.10.0",
     "npm": "10.3.0"
   },
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "node ./prod/index.js",
     "git": "git add . && git commit -m \"$npm_package_name ($npm_package_version) ## $(date) ## \" && git push origin master",
-    "inspect": "node inspect dist/index.js",
+    "inspect": "node inspect prod/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "pre:build": "rm -rf ./dist && tsc && cd ./webui && npm install && npm run build",
-    "move-folders": "mv ./webui/dist ./dist/public",
+    "pre:build": "rm -rf ./prod && tsc && cd ./webui && npm run build",
+    "move-folders": "mv ./webui/dist ./prod/public",
     "self:build": "npm run pre:build && npm run move-folders",
-    "build": "npm run self:build && rm -rf ./webui ./src",
-    "serve": "node ./dist/index.js",
-    "serve:pm2": "pm2 start ./dist/index.js",
-    "serve:pm2:runtime": "pm2-runtime start ./dist/index.js",
+    "build": "node -v",
+    "serve": "node ./prod/index.js",
+    "serve:pm2": "pm2 start ./prod/index.js",
+    "serve:pm2:runtime": "pm2-runtime start ./prod/index.js",
     "deploy": "git push heroku master"
   },
   "keywords": [

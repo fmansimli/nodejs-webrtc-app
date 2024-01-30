@@ -4,7 +4,7 @@ import { join } from "path";
 
 export const catch404: RequestHandler = async (req, res, next) => {
   try {
-    res.status(404).sendFile(join(process.cwd(), "./dist/public/index.html"));
+    res.status(404).sendFile(join(process.cwd(), "./prod/public/index.html"));
   } catch (error) {
     next(error);
   }

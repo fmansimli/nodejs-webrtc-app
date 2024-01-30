@@ -13,7 +13,7 @@ const app = express();
 AppConfig.init();
 
 app.use(express.json());
-app.use(express.static(join(process.cwd(), "./dist/public")));
+app.use(express.static(join(process.cwd(), "./prod/public")));
 
 app.use(helmet());
 app.use(morgan("dev"));
