@@ -11,7 +11,9 @@
     "experimentalDecorators": true,
     "strict": true,
     "skipLibCheck": true,
-    "removeComments": true
+    "removeComments": true,
+    "declaration": true,
+    "allowJs": true
   },
   "exclude": ["node_modules", "tests", "./webui"]
 }

@@ -12,12 +12,14 @@
     "git": "git add . && git commit -m \"$npm_package_name ($npm_package_version) ## $(date) ## \" && git push origin master",
     "inspect": "node inspect dist/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "pre:build": "rm -rf ./dist && tsc && cd ./webui && npm run build",
+    "pre:build": "rm -rf ./dist && tsc && cd ./webui && npm install && npm run build",
     "move-folders": "mv ./webui/dist ./dist/public",
-    "build": "npm run pre:build && npm run move-folders",
+    "self:build": "npm run pre:build && npm run move-folders",
+    "build": "npm run self:build && rm -rf ./webui ./src",
     "serve": "node ./dist/index.js",
     "serve:pm2": "pm2 start ./dist/index.js",
-    "serve:pm2:runtime": "pm2-runtime start ./distclear/index.js"
+    "serve:pm2:runtime": "pm2-runtime start ./dist/index.js",
+    "deploy": "git push heroku master"
   },
   "keywords": [
     "webrtc",
