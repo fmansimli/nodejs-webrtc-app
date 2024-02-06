@@ -1,21 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 
 import { peerCons } from "../constants/webrtc";
 import * as rtcSocket from "../sockets/webrtc.socket";
 
+import MicOff from "../components/icons/MicOff";
+import MicOn from "../components/icons/MicOn";
+import VideoOff from "../components/icons/VideoOff";
+import VideoOn from "../components/icons/VideoOn";
+import HangUp from "../components/icons/HangUp";
+import { peerStatus } from "../constants/peer-status";
+
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
+  const [callEnded, setCallEnded] = useState(false);
+
   const localRef = useRef<HTMLVideoElement>(null);
   const remoteRef = useRef<HTMLVideoElement>(null);
 
-  const pc = useRef<RTCPeerConnection>(new RTCPeerConnection(peerCons));
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(true);
 
-  const locationn = useLocation();
-  const { pid, first, pname } = locationn.state || {};
+  const [peerData, setPeerData] = useState({ type: "" });
+
+  const pc = useRef<RTCPeerConnection>(new RTCPeerConnection(peerCons));
+  const meta = Object.fromEntries(new URLSearchParams(location.search));
 
   useEffect(() => {
-    if (!callStarted) {
+    if (meta.pid && meta.pname) {
       startCall();
     }
   }, []);
@@ -24,7 +35,7 @@ const CallPage = () => {
     rtcSocket.rtcIn(({ desc, type }: any) => {
       if (type === "offer") {
         createAnswer({ desc }).then((answer: any) => {
-          rtcSocket.sendRTC(pid, "answer", answer);
+          rtcSocket.sendRTC(meta.pid, "answer", answer);
         });
       } else if (type === "answer") {
         handleAnswer({ desc });
@@ -34,6 +45,15 @@ const CallPage = () => {
         if (pc.current) {
           pc.current?.addIceCandidate(iceCandidate);
         }
+      } else if (type === "act") {
+        if (desc.type === "CALL_ENDED") {
+          (localRef.current?.srcObject as MediaStream)
+            .getTracks()
+            .forEach((track) => track.stop());
+          setCallEnded(true);
+        } else {
+          setPeerData(desc);
+        }
       }
     });
   }, []);
@@ -41,7 +61,7 @@ const CallPage = () => {
   useEffect(() => {
     pc.current.onicecandidate = (event) => {
       if (event.candidate) {
-        rtcSocket.sendRTC(pid, "can", event.candidate);
+        rtcSocket.sendRTC(meta.pid, "can", event.candidate);
       }
     };
   }, []);
@@ -51,7 +71,7 @@ const CallPage = () => {
       if (remoteRef.current) {
         const remoteVideo = remoteRef.current;
         event.streams[0].getTracks().forEach((track) => {
-          (remoteVideo.srcObject as MediaStream).addTrack(track);
+          (remoteVideo.srcObject as MediaStream)?.addTrack(track);
         });
       }
     };
@@ -77,9 +97,9 @@ const CallPage = () => {
         pc.current.addTrack(track, localStream);
       });
 
-      if (first) {
+      if (meta.first === "true") {
         const offer = await createOffer();
-        rtcSocket.sendRTC(pid, "offer", offer);
+        rtcSocket.sendRTC(meta.pid, "offer", offer);
       }
     } catch (error: any) {
       console.error("START_CALL_ERROR: " + error);
@@ -139,23 +159,116 @@ const CallPage = () => {
     }
   }
 
-  return (
-    <div className="grid h-screen grid-cols-1 overflow-hidden">
-      <video
-        className="fixed left-5 top-5 z-10 h-20 w-32 rounded-md border-2 bg-black object-cover shadow-md lg:h-44 lg:w-80"
-        id="user-1"
-        ref={localRef}
-        autoPlay
-        playsInline></video>
-      <video
-        className="h-full w-full bg-black object-cover"
-        ref={remoteRef}
-        autoPlay
-        playsInline></video>
-      <div className="bg-indigo-200 rounded-md py-1 px-4 absolute right-2 bottom-2">
-        <a className="text-black" href="/">
-          {pname}
+  async function toogleCamera() {
+    try {
+      const videoTrack = (localRef.current?.srcObject as MediaStream)
+        .getTracks()
+        .find((track) => track.kind === "video");
+
+      if (videoTrack?.enabled) {
+        videoTrack.enabled = false;
+        setIsVideoOn(false);
+        rtcSocket.sendRTC(meta.pid, "act", { type: "VIDEO_PAUSED" });
+      } else {
+        videoTrack!.enabled = true;
+        setIsVideoOn(true);
+        rtcSocket.sendRTC(meta.pid, "act", { type: "" });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function toogleMic() {
+    try {
+      const audioTrack = (localRef.current?.srcObject as MediaStream)
+        .getTracks()
+        .find((track) => track.kind === "audio");
+
+      if (audioTrack?.enabled) {
+        audioTrack.enabled = false;
+        setIsMicOn(false);
+      } else {
+        audioTrack!.enabled = true;
+        setIsMicOn(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function hangUpCall(): void {
+    try {
+      (localRef.current?.srcObject as MediaStream)
+        .getTracks()
+        .forEach((track) => track.stop());
+      setCallEnded(true);
+
+      setCallEnded(true);
+      rtcSocket.sendRTC(meta.pid, "act", { type: "CALL_ENDED" });
+    } catch (error) {
+      console.error("CALL_HANGUP_ERROR:", error);
+    }
+  }
+
+  if (!meta.pid || !meta.pname || callEnded) {
+    return (
+      <div className="h-screen w-full flex flex-col gap-10 items-center justify-center">
+        <div className="text-xl font-semibold text-red-700">
+          <div>Call Ended!</div>
+        </div>
+        <a className="text-blue-500" href="/">
+          Go Home
         </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid h-screen grid-cols-1 w-full overflow-hidden">
+      <div className="">
+        <video
+          className="fixed left-5 top-5 z-10 h-20 w-32 rounded-md border-2 bg-black object-cover shadow-md lg:h-44 lg:w-80"
+          id="user-1"
+          ref={localRef}
+          autoPlay
+          playsInline></video>
+      </div>
+      <div className="h-screen w-full relative">
+        {peerData.type && (
+          <div className=" absolute left-[21%] top-[42%] right-[21%]">
+            <div className="bg-white shadow-md rounded-xl px-4 py-2">
+              <div className="text-center">{peerStatus[peerData.type]}</div>
+            </div>
+          </div>
+        )}
+        <video
+          className="h-full w-full bg-black object-cover"
+          ref={remoteRef}
+          autoPlay
+          playsInline></video>
+      </div>
+
+      <div className="bg-white mx-[20%] lg:mx-[30%]  py-3 bottom-7 shadow-md fixed inset-x-0 rounded-xl flex justify-around items-center">
+        <button onClick={toogleMic}>
+          <div className="rounded-full p-4 bg-slate-400 flex justify-center items-center">
+            {isMicOn ? <MicOn /> : <MicOff />}
+          </div>
+        </button>
+        <button onClick={toogleCamera}>
+          <div className="rounded-full p-4 bg-slate-400 flex justify-center items-center">
+            {isVideoOn ? <VideoOn /> : <VideoOff />}
+          </div>
+        </button>
+        <button onClick={hangUpCall}>
+          <div className="rounded-full p-4 bg-red-700 flex justify-center items-center">
+            <HangUp />
+          </div>
+        </button>
+      </div>
+
+      <div className="bg-indigo-200 rounded-md py-1 px-4 absolute right-2 top-2">
+        {meta.pname}
       </div>
     </div>
   );

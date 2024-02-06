@@ -3,7 +3,7 @@ import { type Socket, io } from "socket.io-client";
 let socket: Socket;
 const BASE_URL = import.meta.env.VITE_HOST_URL;
 
-export const initWebRTC = (token: string) => {
+export const initWebRTC = (token: string, callback: (succeed: boolean) => void) => {
   if (socket?.connected) {
     return;
   }
@@ -18,21 +18,22 @@ export const initWebRTC = (token: string) => {
   });
 
   socket.on("connect", () => {
-    console.log("SOCKET_CONNECTED:");
+    callback(true);
   });
 
   socket.on("disconnect", (reason) => {
     if (reason === "io server disconnect") {
       socket.connect();
+    } else {
+      callback(false);
     }
   });
 
-  socket.on("connect_error", (error) => {
-    console.error("SOCKET_CONN_ERROR:", error);
+  socket.on("connect_error", (_error) => {
+    callback(false);
   });
 
   socket.on("unauthorized", (_data) => {});
-
   socket.on("success", (_data) => {});
 };
 
@@ -40,7 +41,7 @@ export const disconnect = (): void => {
   if (socket?.connected) {
     socket.disconnect();
   }
-  socket.removeAllListeners();
+  socket?.removeAllListeners();
 };
 
 export const reconnect = (): void => {
@@ -72,7 +73,11 @@ export const sendRTC = (id: string, type: string, desc: any): void => {
 };
 
 export const rtcIn = (callback: any): void => {
-  socket.on("in-rtc", (data: any) => {
-    callback(data);
-  });
+  try {
+    socket.on("in-rtc", (data: any) => {
+      callback(data);
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };

@@ -6,34 +6,41 @@ import * as rtcSocket from "../sockets/webrtc.socket";
 
 const PreviewPage = () => {
   const [isSearching, setIsSearching] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    rtcSocket.initWebRTC(import.meta.env.VITE_EXAMPLE_TOKEN);
-  }, []);
+    if (socketConnected) {
+      rtcSocket.heyIn(({ pid, pname }: any) => {
+        navigate(`/call?pname=${pname}&pid=${pid}&first=false`, { replace: true });
+      });
 
-  useEffect(() => {
-    rtcSocket.heyIn(({ pid, pname }: any) => {
-      navigate("/call", { replace: true, state: { pid, pname, first: false } });
-    });
-
-    rtcSocket.replyIn(({ pid, pname }: any) => {
-      navigate("/call", { replace: true, state: { pid, pname, first: true } });
-    });
-  }, []);
+      rtcSocket.replyIn(({ pid, pname }: any) => {
+        navigate(`/call?pname=${pname}&pid=${pid}&first=true`, { replace: true });
+      });
+    }
+  }, [socketConnected]);
 
   async function searchOrCancel() {
     if (isSearching) {
-      setIsSearching(false);
+      rtcSocket.disconnect();
       return;
     }
 
     try {
       setIsSearching(true);
-      rtcSocket.joinGlobal();
+
+      rtcSocket.initWebRTC(import.meta.env.VITE_EXAMPLE_TOKEN, (succeed) => {
+        if (succeed) {
+          rtcSocket.joinGlobal();
+          setSocketConnected(true);
+        } else {
+          setIsSearching(false);
+        }
+      });
     } catch (error: any) {
-      alert(error.message);
+      setIsSearching(false);
     }
   }
 
