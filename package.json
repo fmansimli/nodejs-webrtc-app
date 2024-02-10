@@ -19,7 +19,7 @@
     "serve": "node ./prod/index.js",
     "serve:pm2": "pm2 start ./prod/index.js",
     "serve:pm2:runtime": "pm2-runtime start ./prod/index.js",
-    "deploy": "npm run self:build && git push heroku master"
+    "deploy": "npm run self:build && npm run git && git push heroku master"
   },
   "keywords": [
     "webrtc",
