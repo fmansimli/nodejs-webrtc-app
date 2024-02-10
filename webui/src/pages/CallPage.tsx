@@ -8,7 +8,6 @@ import VideoIcon from "../components/icons/VideoIcon";
 import HangUpIcon from "../components/icons/HangUpIcon";
 
 import PeerStatus from "../components/PeerStatus";
-import Spinner from "../components/ui/Spinner";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
