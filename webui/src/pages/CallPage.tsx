@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { peerCons } from "../constants/webrtc";
 import * as rtcSocket from "../sockets/webrtc.socket";
 
-import MicOff from "../components/icons/MicOff";
-import MicOn from "../components/icons/MicOn";
-import VideoOff from "../components/icons/VideoOff";
-import VideoOn from "../components/icons/VideoOn";
-import HangUp from "../components/icons/HangUp";
-import { peerStatus } from "../constants/peer-status";
+import MicIcon from "../components/icons/MicIcon";
+import VideoIcon from "../components/icons/VideoIcon";
+import HangUpIcon from "../components/icons/HangUpIcon";
+
+import PeerStatus from "../components/PeerStatus";
+import Spinner from "../components/ui/Spinner";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
@@ -19,8 +19,9 @@ const CallPage = () => {
 
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isPeerReady, setIsPeerReady] = useState(false);
 
-  const [peerData, setPeerData] = useState({ type: "" });
+  const [peerData, setPeerData] = useState({ type: "PREP" });
 
   const pc = useRef<RTCPeerConnection>(new RTCPeerConnection(peerCons));
   const meta = Object.fromEntries(new URLSearchParams(location.search));
@@ -30,6 +31,12 @@ const CallPage = () => {
       startCall();
     }
   }, []);
+
+  useEffect(() => {
+    if (!isPeerReady || meta.first !== "true") return;
+
+    createOffer().then((offer) => rtcSocket.sendRTC(meta.pid, "offer", offer));
+  }, [isPeerReady]);
 
   useEffect(() => {
     rtcSocket.rtcIn(({ desc, type }: any) => {
@@ -54,6 +61,9 @@ const CallPage = () => {
         } else {
           setPeerData(desc);
         }
+      } else if (type === "ready") {
+        setIsPeerReady(true);
+        setPeerData({ type: "" });
       }
     });
   }, []);
@@ -86,6 +96,10 @@ const CallPage = () => {
 
       if (localRef.current && localStream) {
         localRef.current.srcObject = localStream;
+
+        if (meta.video !== "true") {
+          toogleCamera();
+        }
       }
 
       const remoteStream = new MediaStream();
@@ -97,10 +111,7 @@ const CallPage = () => {
         pc.current.addTrack(track, localStream);
       });
 
-      if (meta.first === "true") {
-        const offer = await createOffer();
-        rtcSocket.sendRTC(meta.pid, "offer", offer);
-      }
+      rtcSocket.sendRTC(meta.pid, "ready", {});
     } catch (error: any) {
       console.error("START_CALL_ERROR: " + error);
     }
@@ -202,7 +213,6 @@ const CallPage = () => {
       (localRef.current?.srcObject as MediaStream)
         .getTracks()
         .forEach((track) => track.stop());
-      setCallEnded(true);
 
       setCallEnded(true);
       rtcSocket.sendRTC(meta.pid, "act", { type: "CALL_ENDED" });
@@ -213,7 +223,7 @@ const CallPage = () => {
 
   if (!meta.pid || !meta.pname || callEnded) {
     return (
-      <div className="h-screen w-full flex flex-col gap-10 items-center justify-center">
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
         <div className="text-xl font-semibold text-red-700">
           <div>Call Ended!</div>
         </div>
@@ -225,23 +235,23 @@ const CallPage = () => {
   }
 
   return (
-    <div className="grid h-screen grid-cols-1 w-full overflow-hidden">
-      <div className="">
+    <div className="grid h-screen w-full grid-cols-1 overflow-hidden">
+      <div className="fixed left-5 top-5 z-10">
+        <div className="absolute left-[21%] right-[21%] top-[35%] flex justify-center">
+          {!isVideoOn && <PeerStatus type="VIDEO_PAUSED" />}
+        </div>
+
         <video
-          className="fixed left-5 top-5 z-10 h-20 w-32 rounded-md border-2 bg-black object-cover shadow-md lg:h-44 lg:w-80"
+          className="h-20 w-32 rounded-md border-2 bg-black object-cover shadow-md lg:h-44 lg:w-80"
           id="user-1"
           ref={localRef}
           autoPlay
           playsInline></video>
       </div>
-      <div className="h-screen w-full relative">
-        {peerData.type && (
-          <div className=" absolute left-[21%] top-[42%] right-[21%]">
-            <div className="bg-white shadow-md rounded-xl px-4 py-2">
-              <div className="text-center">{peerStatus[peerData.type]}</div>
-            </div>
-          </div>
-        )}
+      <div className="relative h-screen w-full">
+        <div className="absolute left-[21%] right-[21%] top-[42%] flex justify-center">
+          <PeerStatus type={peerData.type} />
+        </div>
         <video
           className="h-full w-full bg-black object-cover"
           ref={remoteRef}
@@ -249,25 +259,25 @@ const CallPage = () => {
           playsInline></video>
       </div>
 
-      <div className="bg-white mx-[20%] lg:mx-[30%]  py-3 bottom-7 shadow-md fixed inset-x-0 rounded-xl flex justify-around items-center">
+      <div className="fixed inset-x-0 bottom-7  mx-[20%] flex items-center justify-around rounded-xl bg-white py-3 shadow-md lg:mx-[30%]">
         <button onClick={toogleMic}>
-          <div className="rounded-full p-4 bg-slate-400 flex justify-center items-center">
-            {isMicOn ? <MicOn /> : <MicOff />}
+          <div className="flex items-center justify-center rounded-full bg-slate-400 p-4">
+            <MicIcon on={isMicOn} />
           </div>
         </button>
         <button onClick={toogleCamera}>
-          <div className="rounded-full p-4 bg-slate-400 flex justify-center items-center">
-            {isVideoOn ? <VideoOn /> : <VideoOff />}
+          <div className="flex items-center justify-center rounded-full bg-slate-400 p-4">
+            <VideoIcon on={isVideoOn} />
           </div>
         </button>
         <button onClick={hangUpCall}>
-          <div className="rounded-full p-4 bg-red-700 flex justify-center items-center">
-            <HangUp />
+          <div className="flex items-center justify-center rounded-full bg-red-700 p-4">
+            <HangUpIcon />
           </div>
         </button>
       </div>
 
-      <div className="bg-indigo-200 rounded-md py-1 px-4 absolute right-2 top-2">
+      <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
         {meta.pname}
       </div>
     </div>

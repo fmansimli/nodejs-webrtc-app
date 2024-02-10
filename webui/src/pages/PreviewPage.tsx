@@ -3,21 +3,29 @@ import { Link, useNavigate } from "react-router-dom";
 
 import Spinner from "../components/ui/Spinner";
 import * as rtcSocket from "../sockets/webrtc.socket";
+import Switch from "../components/ui/Switch";
+import MyButton from "../components/ui/MyButton";
+import ProfileWidget from "../components/ProfileWidget";
 
 const PreviewPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (socketConnected) {
       rtcSocket.heyIn(({ pid, pname }: any) => {
-        navigate(`/call?pname=${pname}&pid=${pid}&first=false`, { replace: true });
+        navigate(`/call?pname=${pname}&pid=${pid}&first=false&video=${isVideoOn}`, {
+          replace: true
+        });
       });
 
       rtcSocket.replyIn(({ pid, pname }: any) => {
-        navigate(`/call?pname=${pname}&pid=${pid}&first=true`, { replace: true });
+        navigate(`/call?pname=${pname}&pid=${pid}&first=true&video=${isVideoOn}`, {
+          replace: true
+        });
       });
     }
   }, [socketConnected]);
@@ -45,15 +53,22 @@ const PreviewPage = () => {
   }
 
   return (
-    <div className="flex w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-5">
-        {isSearching && <Spinner />}
-        <button onClick={searchOrCancel} className="rounded-md bg-amber-600 px-5 py-3">
-          {isSearching ? "Cancel" : "search in global"}
-        </button>
+    <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full flex-col items-center justify-between gap-5 border-4 py-[18%]">
+        <ProfileWidget username="Farid Mansimli" profession="Software Developer" />
         <Link className="text-blue-500" to="/">
           Go Home
         </Link>
+        {isSearching ? (
+          <Spinner className="h-20 w-20 border-8" />
+        ) : (
+          <div className="flex items-center justify-center rounded-md border-2 px-10 py-5">
+            <Switch label="video" onChange={(value) => setIsVideoOn(value)} />
+          </div>
+        )}
+        <div className="my-5">
+          <MyButton onClick={searchOrCancel}>{isSearching ? "cancel" : "search"}</MyButton>
+        </div>
       </div>
     </div>
   );
