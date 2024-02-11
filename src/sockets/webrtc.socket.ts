@@ -6,12 +6,6 @@ export const init = (io: Server) => {
   nsp.use(async (socket, next) => {
     try {
       const data: any = await Jwt.verifyAsync(socket.handshake.auth.token.split(" ")[1]);
-
-      if (!data?.username) {
-        Object.assign(data, {
-          username: "User" + Math.floor(Math.random() * 10000)
-        });
-      }
       socket.data = data;
 
       next();
@@ -28,7 +22,12 @@ export const init = (io: Server) => {
 
         if (partner) {
           partner.leave(partner.data.lang);
-          socket.to(partner.id).emit("hey", { pid: socket.id, pname: socket.data.username });
+          socket.to(partner.id).emit("hey", {
+            pid: socket.id,
+            pname: socket.data.username,
+            deviceType: socket.data.deviceType,
+            deviceName: socket.data.deviceName
+          });
         } else {
           socket.join(socket.data.lang);
         }
@@ -39,7 +38,12 @@ export const init = (io: Server) => {
     });
 
     socket.on("heyy", ({ pid }: any, callback: any) => {
-      socket.to(pid).emit("heyy", { pid: socket.id, pname: socket.data.username });
+      socket.to(pid).emit("heyy", {
+        pid: socket.id,
+        pname: socket.data.username,
+        deviceType: socket.data.deviceType,
+        deviceName: socket.data.deviceName
+      });
       callback();
     });
 

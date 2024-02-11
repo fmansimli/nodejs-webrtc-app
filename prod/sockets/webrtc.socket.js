@@ -7,11 +7,6 @@ const init = (io) => {
     nsp.use(async (socket, next) => {
         try {
             const data = await jwt_1.Jwt.verifyAsync(socket.handshake.auth.token.split(" ")[1]);
-            if (!(data === null || data === void 0 ? void 0 : data.username)) {
-                Object.assign(data, {
-                    username: "User" + Math.floor(Math.random() * 10000)
-                });
-            }
             socket.data = data;
             next();
         }
@@ -26,7 +21,12 @@ const init = (io) => {
                 const partner = partners[0];
                 if (partner) {
                     partner.leave(partner.data.lang);
-                    socket.to(partner.id).emit("hey", { pid: socket.id, pname: socket.data.username });
+                    socket.to(partner.id).emit("hey", {
+                        pid: socket.id,
+                        pname: socket.data.username,
+                        deviceType: socket.data.deviceType,
+                        deviceName: socket.data.deviceName
+                    });
                 }
                 else {
                     socket.join(socket.data.lang);
@@ -38,7 +38,12 @@ const init = (io) => {
             }
         });
         socket.on("heyy", ({ pid }, callback) => {
-            socket.to(pid).emit("heyy", { pid: socket.id, pname: socket.data.username });
+            socket.to(pid).emit("heyy", {
+                pid: socket.id,
+                pname: socket.data.username,
+                deviceType: socket.data.deviceType,
+                deviceName: socket.data.deviceName
+            });
             callback();
         });
         socket.on("join-room", (id, callback) => {

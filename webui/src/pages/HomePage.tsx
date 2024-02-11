@@ -14,7 +14,7 @@ const HomePage = () => {
 
       <MyButton onClick={showSearchParams}>show search params</MyButton>
 
-      <Link className="text-blue-500" to={`/preview?device=${meta.device || "browser"}`}>
+      <Link className="text-blue-500" to={`/preview?device=${meta.device || "3"}`}>
         Go to Preview
       </Link>
     </div>

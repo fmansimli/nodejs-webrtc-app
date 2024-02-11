@@ -55,16 +55,16 @@ export const joinGlobal = () => {
 };
 
 export const heyIn = (callback: (data: any) => void) => {
-  socket.on("hey", ({ pid, pname }: any) => {
-    socket.emit("heyy", { pid, pname }, () => {
-      callback({ pid, pname });
+  socket.on("hey", ({ pid, pname, deviceType, deviceName }: any) => {
+    socket.emit("heyy", { pid }, () => {
+      callback({ pid, pname, deviceType, deviceName });
     });
   });
 };
 
 export const replyIn = (callback: (data: any) => void) => {
-  socket.on("heyy", ({ pid, pname }: any) => {
-    callback({ pid, pname });
+  socket.on("heyy", ({ pid, pname, deviceType, deviceName }: any) => {
+    callback({ pid, pname, deviceType, deviceName });
   });
 };
 

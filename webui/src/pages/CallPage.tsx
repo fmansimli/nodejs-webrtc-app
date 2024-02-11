@@ -62,7 +62,7 @@ const CallPage = () => {
         }
       } else if (type === "ready") {
         setIsPeerReady(true);
-        setPeerData({ type: "" });
+        setPeerData({ type: desc.type });
       }
     });
   }, []);
@@ -96,7 +96,7 @@ const CallPage = () => {
       if (localRef.current && localStream) {
         localRef.current.srcObject = localStream;
 
-        if (meta.video !== "true") {
+        if (meta.isVideoOn !== "true") {
           toogleCamera();
         }
       }
@@ -110,7 +110,9 @@ const CallPage = () => {
         pc.current.addTrack(track, localStream);
       });
 
-      rtcSocket.sendRTC(meta.pid, "ready", {});
+      rtcSocket.sendRTC(meta.pid, "ready", {
+        type: meta.isVideoOn === "true" ? "" : "VIDEO_PAUSED"
+      });
     } catch (error: any) {
       console.error("START_CALL_ERROR: " + error);
     }
@@ -277,7 +279,7 @@ const CallPage = () => {
       </div>
 
       <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
-        {meta.pname} - {meta.device}
+        {meta.pname} - {meta.deviceType} - {meta.deviceName}
       </div>
     </div>
   );
