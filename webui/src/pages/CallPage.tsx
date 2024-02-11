@@ -277,7 +277,7 @@ const CallPage = () => {
       </div>
 
       <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
-        {meta.pname}
+        {meta.pname} - {meta.device}
       </div>
     </div>
   );

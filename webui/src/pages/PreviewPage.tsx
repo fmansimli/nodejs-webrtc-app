@@ -14,18 +14,26 @@ const PreviewPage = () => {
 
   const navigate = useNavigate();
 
+  const meta = Object.fromEntries(new URLSearchParams(location.search));
+
   useEffect(() => {
     if (socketConnected) {
       rtcSocket.heyIn(({ pid, pname }: any) => {
-        navigate(`/call?pname=${pname}&pid=${pid}&first=false&video=${isVideoOn}`, {
-          replace: true
-        });
+        navigate(
+          `/call?pname=${pname}&pid=${pid}&first=false&video=${isVideoOn}&device=${meta.device}`,
+          {
+            replace: true
+          }
+        );
       });
 
       rtcSocket.replyIn(({ pid, pname }: any) => {
-        navigate(`/call?pname=${pname}&pid=${pid}&first=true&video=${isVideoOn}`, {
-          replace: true
-        });
+        navigate(
+          `/call?pname=${pname}&pid=${pid}&first=true&video=${isVideoOn}&device=${meta.device}`,
+          {
+            replace: true
+          }
+        );
       });
     }
   }, [socketConnected]);
