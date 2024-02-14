@@ -15,5 +15,5 @@
     "declaration": true,
     "allowJs": true
   },
-  "exclude": ["node_modules", "tests", "./webui"]
+  "exclude": ["node_modules", "tests", "./webui", "zfolder"]
 }
