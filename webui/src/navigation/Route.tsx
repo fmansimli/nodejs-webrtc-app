@@ -8,7 +8,7 @@ interface IProps {
 const Route: React.FC<IProps> = ({ path, children }) => {
   const { currentPath } = useNavigation();
 
-  if (path === currentPath) {
+  if (currentPath.split("?")[0] === path) {
     return children;
   }
 

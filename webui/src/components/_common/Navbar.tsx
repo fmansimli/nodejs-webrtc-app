@@ -1,25 +1,27 @@
-import { NavLink } from "react-router-dom";
+import Link from "../../navigation/Link";
 
 const Navbar = () => {
   return (
     <nav className="bg-gray-200">
       <div className="container mx-auto flex items-center justify-between">
         <div>
-          <NavLink to="/">Navbar</NavLink>
+          <Link className="" to="/">
+            Navbar
+          </Link>
         </div>
         <ul className="flex items-center gap-6">
           <li>
             <a href="/">refresh</a>
           </li>
           <li>
-            <NavLink className="inline-block py-3" to="/">
+            <Link className="inline-block py-3" to="/">
               Home
-            </NavLink>
+            </Link>
           </li>
           <li>
-            <NavLink className="inline-block py-3" to="/preview">
+            <Link className="inline-block py-3" to="/preview">
               Preview
-            </NavLink>
+            </Link>
           </li>
         </ul>
       </div>
