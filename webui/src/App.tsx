@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Route from "./navigation/Route";
+import { NavigationProvider } from "./context/navigation";
 
 import PreviewPage from "./pages/PreviewPage";
 import CallPage from "./pages/CallPage";
@@ -7,18 +8,24 @@ import NotFoundPage from "./pages/NotFound";
 
 function App() {
   return (
-    <BrowserRouter basename="/">
+    <NavigationProvider>
       <div className="flex min-h-screen w-full flex-col">
         <div className="flex flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/preview" element={<PreviewPage />} />
-            <Route path="/call" element={<CallPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <Route path="/">
+            <HomePage />
+          </Route>
+          <Route path="/preview">
+            <PreviewPage />
+          </Route>
+          <Route path="/call">
+            <CallPage />
+          </Route>
+          <Route path="*">
+            <NotFoundPage />
+          </Route>
         </div>
       </div>
-    </BrowserRouter>
+    </NavigationProvider>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import useNavigation from "../hooks/use-navigation";
+import Link from "../navigation/Link";
 
 import Spinner from "../components/ui/Spinner";
 import * as rtcSocket from "../sockets/webrtc.socket";
@@ -12,20 +13,20 @@ const PreviewPage = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
 
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   useEffect(() => {
     if (socketConnected) {
       rtcSocket.heyIn(({ pid, pname, deviceType, deviceName }: any) => {
         const data = { pid, pname, deviceName, deviceType, isVideoOn, first: false };
         const params = new URLSearchParams(data as any).toString();
-        navigate("/call?" + params, { replace: true });
+        navigate("/call?" + params);
       });
 
       rtcSocket.replyIn(({ pid, pname, deviceType, deviceName }: any) => {
         const data = { pid, pname, deviceName, deviceType, isVideoOn, first: true };
         const params = new URLSearchParams(data as any).toString();
-        navigate("/call?" + params, { replace: true });
+        navigate("/call?" + params);
       });
     }
   }, [socketConnected]);

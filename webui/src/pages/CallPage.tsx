@@ -8,6 +8,10 @@ import VideoIcon from "../components/icons/VideoIcon";
 import HangUpIcon from "../components/icons/HangUpIcon";
 
 import PeerStatus from "../components/PeerStatus";
+import SwapUserIcon from "../components/icons/SwapUserIcon";
+import QuestionIcon from "../components/icons/QuestionIcon";
+
+const smallFrame = " rounded-md border-2 bg-black object-cover shadow-md";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
@@ -222,6 +226,14 @@ const CallPage = () => {
     }
   }
 
+  function swapFrames(): void {
+    alert(`${meta.deviceType}, ${meta.deviceName} `);
+  }
+
+  function showQuestion(): void {
+    alert(`${meta.deviceType}, ${meta.deviceName} `);
+  }
+
   if (!meta.pid || !meta.pname || callEnded) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
@@ -236,21 +248,21 @@ const CallPage = () => {
   }
 
   return (
-    <div className="grid h-screen w-full grid-cols-1 overflow-hidden">
+    <div className="relative grid h-screen w-full grid-cols-1 overflow-hidden">
       <div className="fixed left-5 top-5 z-10">
-        <div className="absolute left-[21%] right-[21%] top-[35%] flex justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           {!isVideoOn && <PeerStatus type="VIDEO_PAUSED" />}
         </div>
 
         <video
-          className="h-20 w-32 rounded-md border-2 bg-black object-cover shadow-md lg:h-44 lg:w-80"
+          className={"h-20 w-32 md:h-44 md:w-80" + smallFrame}
           id="user-1"
           ref={localRef}
           autoPlay
           playsInline></video>
       </div>
       <div className="relative h-screen w-full">
-        <div className="absolute left-[21%] right-[21%] top-[42%] flex justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           <PeerStatus type={peerData.type} />
         </div>
         <video
@@ -260,26 +272,36 @@ const CallPage = () => {
           playsInline></video>
       </div>
 
-      <div className="fixed inset-x-0 bottom-7  mx-[20%] flex items-center justify-around rounded-xl bg-white py-3 shadow-md lg:mx-[30%]">
-        <button onClick={toogleMic}>
-          <div className="flex items-center justify-center rounded-full bg-slate-400 p-4">
-            <MicIcon on={isMicOn} />
+      <div className="fixed inset-x-0 bottom-7 flex justify-center">
+        <div className="flex items-center gap-5 rounded-3xl bg-white px-4 py-3 shadow-md md:gap-10 md:px-7 md:py-4">
+          <div className="flex items-center gap-4">
+            <button onClick={toogleMic}>
+              <MicIcon on={isMicOn} />
+            </button>
+            <div className="h-8 border-r border-gray-400" />
+            <button onClick={toogleCamera}>
+              <VideoIcon on={isVideoOn} />
+            </button>
           </div>
-        </button>
-        <button onClick={toogleCamera}>
-          <div className="flex items-center justify-center rounded-full bg-slate-400 p-4">
-            <VideoIcon on={isVideoOn} />
+          <button onClick={hangUpCall}>
+            <div className="flex items-center justify-center rounded-full bg-red-600 p-5">
+              <HangUpIcon />
+            </div>
+          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={showQuestion}>
+              <QuestionIcon />
+            </button>
+            <div className="h-8 border-r border-gray-400" />
+            <button onClick={swapFrames}>
+              <SwapUserIcon />
+            </button>
           </div>
-        </button>
-        <button onClick={hangUpCall}>
-          <div className="flex items-center justify-center rounded-full bg-red-700 p-4">
-            <HangUpIcon />
-          </div>
-        </button>
+        </div>
       </div>
 
       <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
-        {meta.pname} - {meta.deviceType} - {meta.deviceName}
+        {meta.pname}
       </div>
     </div>
   );
