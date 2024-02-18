@@ -3,15 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { peerCons } from "../constants/webrtc";
 import * as rtcSocket from "../sockets/webrtc.socket";
 
-import MicIcon from "../components/icons/MicIcon";
-import VideoIcon from "../components/icons/VideoIcon";
-import HangUpIcon from "../components/icons/HangUpIcon";
-
 import PeerStatus from "../components/PeerStatus";
-import SwapUserIcon from "../components/icons/SwapUserIcon";
-import QuestionIcon from "../components/icons/QuestionIcon";
-
-const smallFrame = " rounded-md border-2 bg-black object-cover shadow-md";
+import CallActions from "../components/CallActions";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
@@ -249,13 +242,13 @@ const CallPage = () => {
 
   return (
     <div className="relative grid h-screen w-full grid-cols-1 overflow-hidden">
-      <div className="fixed left-5 top-5 z-10">
+      <div className="fixed left-5 top-5 z-10 h-1/4 w-1/4">
         <div className="absolute inset-0 flex items-center justify-center">
           {!isVideoOn && <PeerStatus type="VIDEO_PAUSED" />}
         </div>
 
         <video
-          className={"h-20 w-32 md:h-44 md:w-80" + smallFrame}
+          className="h-full w-full rounded-md border-2 bg-black object-contain shadow-md"
           id="user-1"
           ref={localRef}
           autoPlay
@@ -273,31 +266,15 @@ const CallPage = () => {
       </div>
 
       <div className="fixed inset-x-0 bottom-7 flex justify-center">
-        <div className="flex items-center gap-5 rounded-3xl bg-white px-4 py-3 shadow-md md:gap-10 md:px-7 md:py-4">
-          <div className="flex items-center gap-4">
-            <button onClick={toogleMic}>
-              <MicIcon on={isMicOn} />
-            </button>
-            <div className="h-8 border-r border-gray-400" />
-            <button onClick={toogleCamera}>
-              <VideoIcon on={isVideoOn} />
-            </button>
-          </div>
-          <button onClick={hangUpCall}>
-            <div className="flex items-center justify-center rounded-full bg-red-600 p-5">
-              <HangUpIcon />
-            </div>
-          </button>
-          <div className="flex items-center gap-4">
-            <button onClick={showQuestion}>
-              <QuestionIcon />
-            </button>
-            <div className="h-8 border-r border-gray-400" />
-            <button onClick={swapFrames}>
-              <SwapUserIcon />
-            </button>
-          </div>
-        </div>
+        <CallActions
+          onHangUpCall={hangUpCall}
+          onToogleCamera={toogleCamera}
+          onToogleMic={toogleMic}
+          onShowQuestion={showQuestion}
+          onSwapFrames={swapFrames}
+          isMicOn={isMicOn}
+          isVideoOn={isVideoOn}
+        />
       </div>
 
       <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
