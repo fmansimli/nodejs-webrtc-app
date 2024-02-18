@@ -251,8 +251,7 @@ const CallPage = () => {
           className="h-full w-full rounded-md border-2 bg-black object-contain shadow-md"
           id="user-1"
           ref={localRef}
-          autoPlay
-          playsInline></video>
+          autoPlay></video>
       </div>
       <div className="relative h-screen w-full">
         <div className="absolute inset-0 flex items-center justify-center">
@@ -261,8 +260,7 @@ const CallPage = () => {
         <video
           className="h-full w-full bg-black object-contain"
           ref={remoteRef}
-          autoPlay
-          playsInline></video>
+          autoPlay></video>
       </div>
 
       <div className="fixed inset-x-0 bottom-7 flex justify-center">
