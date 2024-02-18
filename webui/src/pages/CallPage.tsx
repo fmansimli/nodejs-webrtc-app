@@ -266,7 +266,7 @@ const CallPage = () => {
           <PeerStatus type={peerData.type} />
         </div>
         <video
-          className="bg-black object-contain"
+          className="h-full w-full bg-black object-contain"
           ref={remoteRef}
           autoPlay
           playsInline></video>
