@@ -55,10 +55,10 @@ const PreviewPage = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-gray-800">
-      <div className="flex h-screen w-full flex-col items-center justify-evenly">
+    <div className="min-h-screen w-full bg-gray-800">
+      <div className="flex min-h-screen w-full flex-col items-center justify-evenly">
         <div className="flex w-full flex-col items-center gap-3">
-          <PeopleWorld className="w-[80%] md:w-1/3" />
+          <PeopleWorld className="w-[80%] xl:w-1/3" />
         </div>
         <div className="flex flex-col items-center gap-8">
           {isSearching ? (
