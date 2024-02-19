@@ -4,8 +4,10 @@ import useNavigation from "../hooks/use-navigation";
 import Spinner from "../components/ui/Spinner";
 import Switch from "../components/ui/Switch";
 import MyButton from "../components/ui/MyButton";
-import * as rtcSocket from "../sockets/webrtc.socket";
 import PeopleWorld from "../components/PeopleWorld";
+import LangSelect from "../components/LangSelect";
+
+import * as rtcSocket from "../sockets/webrtc.socket";
 
 const PreviewPage = () => {
   const [isSearching, setIsSearching] = useState(false);
@@ -66,13 +68,16 @@ const PreviewPage = () => {
               <Spinner className="h-20 w-20 border-8 md:h-40 md:w-40 md:border-[15px]" />
             </div>
           ) : (
-            <div className="flex items-center justify-center rounded-md border-2 px-10 py-5">
-              <Switch
-                label="video"
-                onChange={(value) => setIsVideoOn(value)}
-                checked={isVideoOn}
-              />
-            </div>
+            <>
+              <LangSelect />
+              <div className="flex items-center justify-center rounded-md border-2 px-10 py-5">
+                <Switch
+                  label="video"
+                  onChange={(value) => setIsVideoOn(value)}
+                  checked={isVideoOn}
+                />
+              </div>
+            </>
           )}
           <div>
             <MyButton onClick={searchOrCancel}>{isSearching ? "cancel" : "search"}</MyButton>
