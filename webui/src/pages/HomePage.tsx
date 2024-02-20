@@ -22,7 +22,7 @@ const HomePage = () => {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-5 bg-gray-800">
-      <div className="text-xl font-semibold text-indigo-700">HomePage v7</div>
+      <div className="text-xl font-semibold text-indigo-700">HomePage v8</div>
 
       <MyButton onClick={showSearchParams}>show search params</MyButton>
       <MyButton onClick={showSocketData}>show socket data</MyButton>
