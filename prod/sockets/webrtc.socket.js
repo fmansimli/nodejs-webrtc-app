@@ -15,7 +15,7 @@ const init = (io) => {
         }
     });
     nsp.on("connection", async (socket) => {
-        socket.on("random", async (_data, _callback) => {
+        socket.on("random", async (_data, callback) => {
             try {
                 const partners = await nsp.in(socket.data.lang).fetchSockets();
                 const partner = partners[0];
@@ -31,10 +31,10 @@ const init = (io) => {
                 else {
                     socket.join(socket.data.lang);
                 }
-                _callback();
+                callback();
             }
             catch (error) {
-                _callback(error);
+                callback(error);
             }
         });
         socket.on("heyy", ({ pid }, callback) => {
@@ -61,10 +61,16 @@ const init = (io) => {
         socket.on("rtc", ({ id, type, desc }) => {
             nsp.to(id).emit("in-rtc", { desc, type });
         });
-        socket.on("disconnect", () => {
-            nsp.emit("leaving", socket.id);
-        });
-        socket.on("disconnecting", (_reason) => {
+        socket.on("disconnect", () => { });
+        socket.on("disconnecting", (_reason) => { });
+        socket.on("info", async (_data, callback) => {
+            try {
+                const sockets = await nsp.in(socket.data.lang).fetchSockets();
+                callback(sockets.map((socket) => socket.data));
+            }
+            catch (error) {
+                callback(-1);
+            }
         });
     });
 };

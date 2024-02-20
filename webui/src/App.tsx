@@ -1,5 +1,5 @@
-import Route from "./navigation/Route";
 import { NavigationProvider } from "./context/navigation";
+import Route from "./navigation/Route";
 
 import PreviewPage from "./pages/PreviewPage";
 import CallPage from "./pages/CallPage";

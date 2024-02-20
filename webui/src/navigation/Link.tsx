@@ -14,7 +14,6 @@ const Link: React.FC<IProps> = ({ to, children, className }) => {
       return;
     }
     event.preventDefault();
-
     navigate(to);
   };
 

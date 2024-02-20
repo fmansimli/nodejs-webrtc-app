@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import useNavigation from "../hooks/use-navigation";
 
 import { peerCons } from "../constants/webrtc";
 import * as rtcSocket from "../sockets/webrtc.socket";
 
 import PeerStatus from "../components/PeerStatus";
 import CallActions from "../components/CallActions";
+import MyButton from "../components/ui/MyButton";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
@@ -18,12 +20,19 @@ const CallPage = () => {
   const [isPeerReady, setIsPeerReady] = useState(false);
 
   const [peerData, setPeerData] = useState({ type: "PREP" });
+  const { navigate } = useNavigation();
 
   const pc = useRef<RTCPeerConnection>(new RTCPeerConnection(peerCons));
   const meta = Object.fromEntries(new URLSearchParams(location.search));
 
   useEffect(() => {
-    if (meta.pid && meta.pname) {
+    return () => {
+      rtcSocket.disconnect((succeed) => succeed);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (meta.pid && meta.pname && rtcSocket?.socket?.connected) {
       startCall();
     }
   }, []);
@@ -35,52 +44,62 @@ const CallPage = () => {
   }, [isPeerReady]);
 
   useEffect(() => {
-    rtcSocket.rtcIn(({ desc, type }: any) => {
-      if (type === "offer") {
-        createAnswer({ desc }).then((answer: any) => {
-          rtcSocket.sendRTC(meta.pid, "answer", answer);
-        });
-      } else if (type === "answer") {
-        handleAnswer({ desc });
-      } else if (type === "can") {
-        const iceCandidate = new RTCIceCandidate(desc);
+    if (rtcSocket?.socket?.connected) {
+      rtcSocket.rtcIn(({ desc, type }: any) => {
+        if (type === "offer") {
+          createAnswer({ desc }).then((answer: any) => {
+            rtcSocket.sendRTC(meta.pid, "answer", answer);
+          });
+        } else if (type === "answer") {
+          handleAnswer({ desc });
+        } else if (type === "can") {
+          const iceCandidate = new RTCIceCandidate(desc);
 
-        if (pc.current) {
-          pc.current?.addIceCandidate(iceCandidate);
+          if (pc.current) {
+            pc.current?.addIceCandidate(iceCandidate);
+          }
+        } else if (type === "act") {
+          if (desc.type === "CALL_ENDED") {
+            try {
+              (localRef.current?.srcObject as MediaStream)
+                .getTracks()
+                .forEach((track) => track.stop());
+              setCallEnded(true);
+            } catch (error) {
+              console.error("CALL_VIDEO_STOPPING_ERROR: " + error);
+            }
+          } else {
+            setPeerData(desc);
+          }
+        } else if (type === "ready") {
+          setIsPeerReady(true);
+          setPeerData({ type: desc.type });
         }
-      } else if (type === "act") {
-        if (desc.type === "CALL_ENDED") {
-          (localRef.current?.srcObject as MediaStream)
-            .getTracks()
-            .forEach((track) => track.stop());
-          setCallEnded(true);
-        } else {
-          setPeerData(desc);
-        }
-      } else if (type === "ready") {
-        setIsPeerReady(true);
-        setPeerData({ type: desc.type });
-      }
-    });
+      });
+    }
   }, []);
 
   useEffect(() => {
-    pc.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        rtcSocket.sendRTC(meta.pid, "can", event.candidate);
-      }
-    };
+    if (rtcSocket?.socket?.connected) {
+      pc.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          rtcSocket.sendRTC(meta.pid, "can", event.candidate);
+        }
+      };
+    }
   }, []);
 
   useEffect(() => {
-    pc.current.ontrack = (event) => {
-      if (remoteRef.current) {
-        const remoteVideo = remoteRef.current;
-        event.streams[0].getTracks().forEach((track) => {
-          (remoteVideo.srcObject as MediaStream)?.addTrack(track);
-        });
-      }
-    };
+    if (rtcSocket?.socket?.connected) {
+      pc.current.ontrack = (event) => {
+        if (remoteRef.current) {
+          const remoteVideo = remoteRef.current;
+          event.streams[0].getTracks().forEach((track) => {
+            (remoteVideo.srcObject as MediaStream)?.addTrack(track);
+          });
+        }
+      };
+    }
   }, []);
 
   async function startCall() {
@@ -212,8 +231,8 @@ const CallPage = () => {
         .getTracks()
         .forEach((track) => track.stop());
 
-      setCallEnded(true);
       rtcSocket.sendRTC(meta.pid, "act", { type: "CALL_ENDED" });
+      setCallEnded(true);
     } catch (error) {
       console.error("CALL_HANGUP_ERROR:", error);
     }
@@ -227,15 +246,23 @@ const CallPage = () => {
     alert(`${meta.deviceType}, ${meta.deviceName} `);
   }
 
-  if (!meta.pid || !meta.pname || callEnded) {
+  function getSocketData(): void {
+    //
+  }
+
+  function goToSearch(): void {
+    navigate("/preview");
+  }
+
+  if (!meta.pid || !meta.pname || callEnded || !rtcSocket?.socket) {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
-        <div className="text-xl font-semibold text-red-700">
-          <div>Call Ended!</div>
+      <div className="h-screen w-full bg-gray-800">
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
+          <div className="text-2xl font-semibold text-white">
+            <div onClick={getSocketData}>Call Ended!</div>
+          </div>
+          <MyButton onClick={goToSearch}>Go To Search</MyButton>
         </div>
-        <a className="text-blue-500" href="/">
-          Go Home
-        </a>
       </div>
     );
   }
@@ -261,7 +288,8 @@ const CallPage = () => {
         <video
           className="h-full w-full bg-black object-contain"
           ref={remoteRef}
-          playsInline></video>
+          playsInline
+          autoPlay></video>
       </div>
 
       <div className="fixed inset-x-0 bottom-7 flex justify-center">
@@ -276,9 +304,11 @@ const CallPage = () => {
         />
       </div>
 
-      <div className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1">
+      <button
+        className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1"
+        onClick={getSocketData}>
         {meta.pname}
-      </div>
+      </button>
     </div>
   );
 };

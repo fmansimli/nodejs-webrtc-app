@@ -1,11 +1,11 @@
 import { type Socket, io } from "socket.io-client";
 
-let socket: Socket;
+export let socket: Socket;
 const BASE_URL = import.meta.env.VITE_HOST_URL;
 
 export const initWebRTC = (token: string, callback: (succeed: boolean) => void) => {
   if (socket?.connected) {
-    return;
+    return callback(true);
   }
   socket = io(BASE_URL ? BASE_URL + "/webrtc" : "/webrtc", {
     reconnectionAttempts: 10,
@@ -37,11 +37,16 @@ export const initWebRTC = (token: string, callback: (succeed: boolean) => void) 
   socket.on("success", (_data) => {});
 };
 
-export const disconnect = (): void => {
-  if (socket?.connected) {
-    socket.disconnect();
+export const disconnect = (callback: (succeed: boolean) => void): void => {
+  try {
+    if (socket?.connected) {
+      socket.disconnect();
+    }
+    socket?.removeAllListeners();
+    callback(true);
+  } catch (error) {
+    callback(false);
   }
-  socket?.removeAllListeners();
 };
 
 export const reconnect = (): void => {
@@ -50,8 +55,10 @@ export const reconnect = (): void => {
   }
 };
 
-export const joinGlobal = () => {
-  socket.emit("random", {}, () => {});
+export const joinGlobal = (callback: (data?: any) => void) => {
+  socket.emit("random", {}, (data: any) => {
+    callback(data);
+  });
 };
 
 export const heyIn = (callback: (data: any) => void) => {
@@ -80,4 +87,10 @@ export const rtcIn = (callback: any): void => {
   } catch (error) {
     console.error(error);
   }
+};
+
+export const getInfo = (callback: (resp: any) => void) => {
+  socket.emit("info", {}, (_data: any) => {
+    callback(_data);
+  });
 };

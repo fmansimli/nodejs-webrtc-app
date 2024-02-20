@@ -15,7 +15,7 @@ export const init = (io: Server) => {
   });
 
   nsp.on("connection", async (socket) => {
-    socket.on("random", async (_data, _callback) => {
+    socket.on("random", async (_data, callback) => {
       try {
         const partners = await nsp.in(socket.data.lang).fetchSockets();
         const partner = partners[0];
@@ -31,9 +31,9 @@ export const init = (io: Server) => {
         } else {
           socket.join(socket.data.lang);
         }
-        _callback();
+        callback();
       } catch (error) {
-        _callback(error);
+        callback(error);
       }
     });
 
@@ -64,12 +64,16 @@ export const init = (io: Server) => {
       nsp.to(id).emit("in-rtc", { desc, type });
     });
 
-    socket.on("disconnect", () => {
-      nsp.emit("leaving", socket.id);
-    });
+    socket.on("disconnect", () => {});
+    socket.on("disconnecting", (_reason) => {});
 
-    socket.on("disconnecting", (_reason) => {
-      //
+    socket.on("info", async (_data, callback) => {
+      try {
+        const sockets = await nsp.in(socket.data.lang).fetchSockets();
+        callback(sockets.map((socket) => socket.data));
+      } catch (error) {
+        callback(-1);
+      }
     });
   });
 };

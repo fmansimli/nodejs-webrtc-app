@@ -2,6 +2,7 @@ interface IProps {
   label: string;
   onChange: (value: boolean) => void;
   checked: boolean;
+  defaultValue?: boolean;
 }
 
 const Switch: React.FC<IProps> = ({ label, onChange, checked }) => {

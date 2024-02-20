@@ -16,27 +16,25 @@ const PreviewPage = () => {
 
   const { navigate } = useNavigation();
 
-  const meta = Object.fromEntries(new URLSearchParams(location.search));
-
   useEffect(() => {
     if (!socketConnected) return;
 
     rtcSocket.heyIn(({ pid, pname, deviceType, deviceName }: any) => {
-      const s = { pid, pname, deviceName, deviceType, isVideoOn, first: false, me: meta.me };
-      const params = new URLSearchParams(s as any).toString();
+      const sp = { pid, pname, deviceName, deviceType, isVideoOn, first: false };
+      const params = new URLSearchParams(sp as any).toString();
       navigate("/call?" + params);
     });
 
     rtcSocket.replyIn(({ pid, pname, deviceType, deviceName }: any) => {
-      const s = { pid, pname, me: meta.me, deviceName, deviceType, isVideoOn, first: true };
-      const params = new URLSearchParams(s as any).toString();
+      const sp = { pid, pname, deviceName, deviceType, isVideoOn, first: true };
+      const params = new URLSearchParams(sp as any).toString();
       navigate("/call?" + params);
     });
   }, [socketConnected]);
 
   async function searchOrCancel() {
     if (isSearching) {
-      rtcSocket.disconnect();
+      rtcSocket.disconnect((_succeed) => null);
       return;
     }
 
@@ -45,7 +43,12 @@ const PreviewPage = () => {
 
       rtcSocket.initWebRTC(import.meta.env.VITE_EXAMPLE_TOKEN, (succeed) => {
         if (succeed) {
-          rtcSocket.joinGlobal();
+          rtcSocket.joinGlobal((error: any) => {
+            if (error) {
+              alert(error.message);
+            }
+          });
+
           setSocketConnected(true);
         } else {
           setIsSearching(false);
@@ -56,11 +59,21 @@ const PreviewPage = () => {
     }
   }
 
+  function getSocketInfo() {
+    try {
+      rtcSocket.getInfo((resp) => {
+        console.log(resp);
+      });
+    } catch (error) {
+      console.log("GET_SOCKET_DATA_ERROR", error);
+    }
+  }
+
   return (
     <div className="min-h-screen w-full bg-gray-800">
       <div className="flex min-h-screen w-full flex-col items-center justify-evenly">
         <div className="flex w-full flex-col items-center gap-3">
-          <PeopleWorld className="w-[80%] xl:w-1/3" />
+          <PeopleWorld className="w-[80%] xl:w-1/3" onClick={getSocketInfo} />
         </div>
         <div className="flex flex-col items-center gap-8">
           {isSearching ? (

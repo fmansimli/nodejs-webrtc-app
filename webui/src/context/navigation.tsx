@@ -30,7 +30,7 @@ function NavigationProvider({ children }: IProps) {
 
   const navigate = (to: string) => {
     window.history.pushState({}, "", to);
-    setCurrentPath(to);
+    setCurrentPath(to.split("?")[0]);
   };
 
   return (
