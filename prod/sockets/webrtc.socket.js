@@ -7,14 +7,14 @@ const init = (io) => {
     nsp.use(async (socket, next) => {
         try {
             const data = await jwt_1.Jwt.verifyAsync(socket.handshake.auth.token.split(" ")[1]);
-            socket.data = data;
+            socket.data = Object.assign({ ids: new Set() }, data);
             next();
         }
         catch (error) {
             next(error);
         }
     });
-    nsp.on("connection", async (socket) => {
+    nsp.on("connection", (socket) => {
         socket.on("random", async (_data, callback) => {
             try {
                 const partners = await nsp.in(socket.data.lang).fetchSockets();
@@ -37,6 +37,12 @@ const init = (io) => {
                 callback(error);
             }
         });
+        socket.on("call", ({ sid }) => {
+            socket.to(sid).emit("call", Object.assign({ id: socket.id }, socket.data));
+        });
+        socket.on("answer-call", ({ sid, answer }) => {
+            socket.to(sid).emit("answer-call", Object.assign(Object.assign({ id: socket.id }, socket.data), { answer }));
+        });
         socket.on("heyy", ({ pid }, callback) => {
             socket.to(pid).emit("heyy", {
                 pid: socket.id,
@@ -46,7 +52,7 @@ const init = (io) => {
             });
             callback();
         });
-        socket.on("join-room", (id, callback) => {
+        socket.on("join", (id, callback) => {
             var _a;
             const size = (_a = nsp.adapter.rooms.get(id)) === null || _a === void 0 ? void 0 : _a.size;
             if (size && size >= 2) {
@@ -59,17 +65,54 @@ const init = (io) => {
             socket.leave(id);
         });
         socket.on("rtc", ({ id, type, desc }) => {
+            if (type === "ready") {
+                socket.data.ids.add(id);
+            }
             nsp.to(id).emit("in-rtc", { desc, type });
         });
-        socket.on("disconnect", () => { });
+        socket.on("disconnect", () => {
+            socket.to(Array.from(socket.data.ids)).emit("user-left", {
+                id: socket.id
+            });
+        });
         socket.on("disconnecting", (_reason) => { });
-        socket.on("info", async (_data, callback) => {
+        socket.on("get-info", async (_data, callback) => {
             try {
                 const sockets = await nsp.in(socket.data.lang).fetchSockets();
-                callback(sockets.map((socket) => socket.data));
+                callback(sockets.map((socket) => (Object.assign({ id: socket.id }, socket.data))));
             }
             catch (error) {
-                callback(-1);
+                callback(0);
+            }
+        });
+        socket.on("join-room", ({ room }, callback) => {
+            try {
+                socket.join(room);
+                socket.data.ids.add(room);
+                socket.to(room).emit("user-joined", Object.assign({ id: socket.id }, socket.data));
+                callback();
+            }
+            catch (error) {
+                callback(0);
+            }
+        });
+        socket.on("leave-room", ({ room }, callback) => {
+            try {
+                socket.leave(room);
+                socket.to(room).emit("user-left", { id: socket.id });
+                callback();
+            }
+            catch (error) {
+                callback();
+            }
+        });
+        socket.on("get-sockets", async ({ room }, callback) => {
+            try {
+                const sockets = await nsp.in(room).fetchSockets();
+                callback(sockets.map((socket) => (Object.assign({ id: socket.id }, socket.data))));
+            }
+            catch (error) {
+                callback(0);
             }
         });
     });

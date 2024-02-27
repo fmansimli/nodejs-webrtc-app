@@ -232,9 +232,10 @@ const CallPage = () => {
         .forEach((track) => track.stop());
 
       rtcSocket.sendRTC(meta.pid, "act", { type: "CALL_ENDED" });
-      setCallEnded(true);
     } catch (error) {
       console.error("CALL_HANGUP_ERROR:", error);
+    } finally {
+      setCallEnded(true);
     }
   }
 
@@ -250,18 +251,20 @@ const CallPage = () => {
     //
   }
 
-  function goToSearch(): void {
-    navigate("/preview");
+  function goToHome(): void {
+    navigate("/");
   }
 
   if (!meta.pid || !meta.pname || callEnded || !rtcSocket?.socket) {
     return (
-      <div className="h-screen w-full bg-gray-800">
+      <div className="h-screen w-full bg-white dark:bg-gray-800">
         <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
           <div className="text-2xl font-semibold text-white">
-            <div onClick={getSocketData}>Call Ended!</div>
+            <div className="text-blue-700 dark:text-white" onClick={getSocketData}>
+              Call Ended!
+            </div>
           </div>
-          <MyButton onClick={goToSearch}>Go To Search</MyButton>
+          <MyButton onClick={goToHome}>Go To Home</MyButton>
         </div>
       </div>
     );
@@ -305,7 +308,7 @@ const CallPage = () => {
       </div>
 
       <button
-        className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1"
+        className="absolute right-2 top-2 rounded-md bg-indigo-200 px-4 py-1 text-violet-800"
         onClick={getSocketData}>
         {meta.pname}
       </button>

@@ -61,6 +61,32 @@ export const joinGlobal = (callback: (data?: any) => void) => {
   });
 };
 
+export const call = (sid: string) => {
+  socket.emit("call", { sid });
+};
+
+export const callIn = (callback: (data: any) => void) => {
+  socket.on("call", (data: any) => {
+    callback(data);
+  });
+};
+
+export const answerCall = (sid: string, answer: boolean) => {
+  socket.emit("answer-call", { sid, answer });
+};
+
+export const answerCallIn = (callback: (data: any) => void) => {
+  socket.on("answer-call", (_data: any) => {
+    callback(_data);
+  });
+};
+
+export const switchToActive = (callback: (data?: any) => void) => {
+  socket.emit("join-room", { room: "active" }, () => {
+    callback();
+  });
+};
+
 export const heyIn = (callback: (data: any) => void) => {
   socket.on("hey", ({ pid, pname, deviceType, deviceName }: any) => {
     socket.emit("heyy", { pid }, () => {
@@ -89,8 +115,32 @@ export const rtcIn = (callback: any): void => {
   }
 };
 
+export const leaveRoom = (room: string, callback: () => void): void => {
+  socket.emit("leave-room", { room }, () => {
+    callback();
+  });
+};
+
+export const userJoined = (callback: (data: any) => void): void => {
+  socket.on("user-joined", (_data) => {
+    callback(_data);
+  });
+};
+
+export const userLeft = (callback: (data: any) => void): void => {
+  socket.on("user-left", (_data) => {
+    callback(_data);
+  });
+};
+
 export const getInfo = (callback: (resp: any) => void) => {
-  socket.emit("info", {}, (_data: any) => {
+  socket.emit("get-info", {}, (_data: any) => {
+    callback(_data);
+  });
+};
+
+export const getActiveUsers = (callback: (resp: any) => void) => {
+  socket.emit("get-sockets", { room: "active" }, (_data: any) => {
     callback(_data);
   });
 };

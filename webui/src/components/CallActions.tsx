@@ -27,7 +27,7 @@ const CallActions: React.FC<IProps> = (props) => {
         </button>
       </div>
       <button onClick={props.onHangUpCall}>
-        <div className="flex items-center justify-center rounded-full bg-red-600 p-4 md:p-5">
+        <div className="flex items-center justify-center rounded-full bg-red-600 p-3 md:p-5">
           <HangUpIcon />
         </div>
       </button>
