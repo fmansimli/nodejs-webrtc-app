@@ -240,11 +240,11 @@ const CallPage = () => {
   }
 
   function swapFrames(): void {
-    alert(`${meta.deviceType}, ${meta.deviceName} `);
+    alert("test!");
   }
 
   function showQuestion(): void {
-    alert(`${meta.deviceType}, ${meta.deviceName} `);
+    alert("test!");
   }
 
   function getSocketData(): void {

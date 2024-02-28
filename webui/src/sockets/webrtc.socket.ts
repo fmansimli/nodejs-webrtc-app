@@ -81,6 +81,18 @@ export const answerCallIn = (callback: (data: any) => void) => {
   });
 };
 
+export const cancelCall = (id: string, callback: () => void) => {
+  socket.emit("cancel-call", { id }, () => {
+    callback();
+  });
+};
+
+export const callCanceled = (callback: (id: string) => void) => {
+  socket.on("cancel-call", ({ id }) => {
+    callback(id);
+  });
+};
+
 export const switchToActive = (callback: (data?: any) => void) => {
   socket.emit("join-room", { room: "active" }, () => {
     callback();

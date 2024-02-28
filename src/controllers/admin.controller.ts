@@ -2,9 +2,9 @@ import type { RequestHandler } from "express";
 import { Jwt } from "../services/jwt";
 
 export const createJwtKey: RequestHandler = async (req, res, next) => {
-  const { username, lang, deviceType, deviceName } = req.body;
+  const { lang, deviceType, deviceName } = req.body;
   try {
-    const jwtKey = await Jwt.signKey({ username, lang, deviceType, deviceName });
+    const jwtKey = await Jwt.signKey({ lang, deviceType, deviceName });
 
     res.status(200).json({ jwt: jwtKey });
   } catch (error) {

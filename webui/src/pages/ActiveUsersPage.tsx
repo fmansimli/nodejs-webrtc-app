@@ -5,14 +5,21 @@ import useNavigation from "../hooks/use-navigation";
 import Navbar from "../components/_common/Navbar";
 import ProfileWidget from "../components/ProfileWidget";
 import Spinner from "../components/ui/Spinner";
+import MyDialog from "../components/MyDialog";
 
 import * as rtcSocket from "../sockets/webrtc.socket";
+
 import UserlessLottie from "../assets/lottie/no-active-users.json.json";
+import CallRejectedLottie from "../assets/lottie/call-rejected.json";
+import InCallLottie from "../assets/lottie/in-call.json";
+import OutCallLottie from "../assets/lottie/out-call.json";
 
 const ActiveUsersPage = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [callee, setCallee] = useState<any>(null);
+  const [caller, setCaller] = useState<any>(null);
+  const [rejecter, setRejecter] = useState<any>(null);
 
   const callRef = useRef<boolean>(false);
 
@@ -43,7 +50,13 @@ const ActiveUsersPage = () => {
   useEffect(() => {
     rtcSocket.callIn((user) => {
       callRef.current = true;
-      handleCall(user);
+      setCaller(user);
+    });
+  }, []);
+
+  useEffect(() => {
+    rtcSocket.callCanceled((_user) => {
+      setCaller(null);
     });
   }, []);
 
@@ -57,17 +70,13 @@ const ActiveUsersPage = () => {
         });
       } else {
         setCallee(null);
-        alert("call rejected...");
+        setRejecter({ username });
       }
     });
   }, []);
 
-  function handleCall(user: any) {
-    const answer = window.confirm(`"${user.username}" is callling you, answer?`);
-
-    console.log("maraqlidir qaqas...::", answer);
-
-    const { id, username } = user;
+  function handleCall(answer: boolean) {
+    const { id, username } = caller;
     rtcSocket.answerCall(id, answer);
 
     if (answer) {
@@ -76,6 +85,8 @@ const ActiveUsersPage = () => {
         const params = new URLSearchParams(sp as any).toString();
         navigate("/call?" + params);
       });
+    } else {
+      setCaller(null);
     }
   }
 
@@ -100,7 +111,7 @@ const ActiveUsersPage = () => {
   };
 
   async function onCallHandler(user: any) {
-    const result = window.confirm(`do you want to call ${user.username}`);
+    const result = window.confirm(`do you want to call "${user.username}" ?`);
 
     if (result) {
       callRef.current = true;
@@ -109,11 +120,26 @@ const ActiveUsersPage = () => {
     }
   }
 
-  const UsersList = users.map((user) => {
+  function onInfoHandler(user: any): void {
+    const { username, lang } = user || {};
+    alert(JSON.stringify({ username, lang }, null, 2));
+  }
+
+  function cancelCall(): void {
+    try {
+      rtcSocket.cancelCall(callee.id, () => {
+        setCallee(null);
+      });
+    } catch (error) {
+      console.log("CALL_CANCEL_ERROR:", error);
+    }
+  }
+
+  const UsersList = users.map((user, key) => {
     if (user.id !== rtcSocket.socket.id) {
       return (
-        <div key={user.id} className="col-span-1">
-          <ProfileWidget user={user} onCall={onCallHandler} />
+        <div key={user.id + key} className="col-span-1">
+          <ProfileWidget user={user} onCall={onCallHandler} onInfo={onInfoHandler} />
         </div>
       );
     }
@@ -126,11 +152,6 @@ const ActiveUsersPage = () => {
       </div>
       <div className="flex w-full flex-1 bg-white py-10 dark:bg-gray-800">
         <div className="container flex w-full flex-1 flex-col">
-          {callee && (
-            <div className="my-3 w-full border p-5 text-red-600">
-              calling {callee.username} ({callee.id})
-            </div>
-          )}
           {loading ? (
             <div className="flex w-full flex-1 items-center justify-center">
               <Spinner className="h-20 w-20 border-8 md:h-40 md:w-40 md:border-[15px]" />
@@ -149,6 +170,47 @@ const ActiveUsersPage = () => {
           )}
         </div>
       </div>
+      <MyDialog
+        open={!!caller}
+        title={`"${caller?.username}" is calling you, answer?`}
+        onLeftButtonClick={handleCall.bind(null, false)}
+        onRightButtonClick={handleCall.bind(null, true)}
+        leftButtonText="reject"
+        rightButtonText="answer"
+        hasLeftButton
+        hasRightButton>
+        <div className="my-5 flex w-full items-center justify-center">
+          <Lottie className="h-40 w-40" animationData={InCallLottie} />
+        </div>
+      </MyDialog>
+
+      <MyDialog
+        open={!!callee}
+        title={`you're calling "${callee?.username}" ...`}
+        onLeftButtonClick={cancelCall}
+        onRightButtonClick={() => null}
+        leftButtonText="cancel"
+        rightButtonText="answer"
+        hasLeftButton
+        hasRightButton={false}>
+        <div className="my-5 flex w-full items-center justify-center">
+          <Lottie className="h-40 w-40" animationData={OutCallLottie} />
+        </div>
+      </MyDialog>
+
+      <MyDialog
+        open={!!rejecter}
+        title={`"${rejecter?.username}" rejected the call.`}
+        onLeftButtonClick={() => null}
+        onRightButtonClick={() => setRejecter(null)}
+        leftButtonText="ok, got it"
+        rightButtonText="ok, got it"
+        hasLeftButton={false}
+        hasRightButton>
+        <div className="my-5 flex w-full items-center justify-center">
+          <Lottie className="h-40 w-40" animationData={CallRejectedLottie} />
+        </div>
+      </MyDialog>
     </div>
   );
 };

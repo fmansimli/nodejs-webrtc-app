@@ -60,16 +60,6 @@ const HomePage = () => {
     }
   }
 
-  function getSocketInfo() {
-    try {
-      rtcSocket.getInfo((resp) => {
-        console.log(resp);
-      });
-    } catch (error) {
-      console.log("GET_SOCKET_DATA_ERROR", error);
-    }
-  }
-
   return (
     <div className="flex min-h-screen w-full flex-col">
       <div>
@@ -78,11 +68,11 @@ const HomePage = () => {
       <div className="flex w-full flex-1 bg-white dark:bg-gray-800">
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-9">
           <div className="flex w-full flex-col items-center">
-            <PeopleWorld className="w-[80%] xl:w-1/3" onClick={getSocketInfo} />
+            <PeopleWorld className="w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%]" />
           </div>
           <div className="flex flex-col items-center gap-8">
             {isSearching ? (
-              <div className="flex h-52 items-center justify-center md:h-96 xl:h-52">
+              <div className="flex h-52 items-center justify-center md:h-48 xl:h-40">
                 <SearchLottie />
               </div>
             ) : (

@@ -4,8 +4,8 @@
   "description": "nodejs app for webrtc",
   "main": "./prod/index.js",
   "engines": {
-    "node": "20.10.0",
-    "npm": "10.3.0"
+    "node": "20.11.1",
+    "npm": "10.4.0"
   },
   "scripts": {
     "start": "node ./prod/index.js",

@@ -10,7 +10,7 @@ export class Jwt {
   }
 
   static async signKey(payload: any) {
-    return sign(payload, process.env.JWT_SECRET as string, { expiresIn: "120d" });
+    return sign(payload, process.env.JWT_SECRET as string, { expiresIn: "420d" });
   }
 
   static async unpack(token: string) {

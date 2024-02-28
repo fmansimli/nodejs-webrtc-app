@@ -6,7 +6,11 @@ export const init = (io: Server) => {
   nsp.use(async (socket, next) => {
     try {
       const data: any = await Jwt.verifyAsync(socket.handshake.auth.token.split(" ")[1]);
-      socket.data = { ids: new Set(), ...data };
+      socket.data = {
+        ids: new Set(),
+        username: "User" + Math.random().toString().substring(13),
+        ...data
+      };
 
       next();
     } catch (error: any) {
@@ -43,6 +47,11 @@ export const init = (io: Server) => {
 
     socket.on("answer-call", ({ sid, answer }) => {
       socket.to(sid).emit("answer-call", { id: socket.id, ...socket.data, answer });
+    });
+
+    socket.on("cancel-call", ({ id }, callback) => {
+      socket.to(id).emit("cancel-call", { id: socket.id });
+      callback();
     });
 
     socket.on("heyy", ({ pid }: any, callback: any) => {
