@@ -25,7 +25,7 @@ const Navbar = () => {
         <Link
           to="/active"
           className={`rounded-e-lg ${itemClass} ${currentPath === "/active" ? focusClass : ""}`}>
-          Active
+          Online now
         </Link>
 
         <div className="absolute inset-y-0 right-2 flex items-center">
