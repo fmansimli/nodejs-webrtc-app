@@ -16,7 +16,7 @@ import OutCallLottie from "../assets/lottie/out-call.json";
 
 const ActiveUsersPage = () => {
   const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [callee, setCallee] = useState<any>(null);
   const [caller, setCaller] = useState<any>(null);
   const [rejecter, setRejecter] = useState<any>(null);
@@ -58,6 +58,7 @@ const ActiveUsersPage = () => {
   useEffect(() => {
     rtcSocket.callCanceled((_user) => {
       setCaller(null);
+      callRef.current = false;
     });
   }, []);
 
@@ -72,6 +73,7 @@ const ActiveUsersPage = () => {
       } else {
         setCallee(null);
         setRejecter({ username });
+        callRef.current = false;
       }
     });
   }, []);
@@ -88,11 +90,11 @@ const ActiveUsersPage = () => {
       });
     } else {
       setCaller(null);
+      callRef.current = false;
     }
   }
 
   const fetchUsers = () => {
-    setLoading(true);
     rtcSocket.initWebRTC(import.meta.env.VITE_EXAMPLE_TOKEN, (succeed) => {
       if (succeed) {
         rtcSocket.switchToActive(() => {
@@ -130,6 +132,7 @@ const ActiveUsersPage = () => {
     try {
       rtcSocket.cancelCall(callee.id, () => {
         setCallee(null);
+        callRef.current = false;
       });
     } catch (error) {
       console.log("CALL_CANCEL_ERROR:", error);

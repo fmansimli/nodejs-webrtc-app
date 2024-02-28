@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useNavigation from "../hooks/use-navigation";
+import Lottie from "lottie-react";
 
 import { peerCons } from "../constants/webrtc";
 import * as rtcSocket from "../sockets/webrtc.socket";
@@ -7,6 +8,7 @@ import * as rtcSocket from "../sockets/webrtc.socket";
 import PeerStatus from "../components/PeerStatus";
 import CallActions from "../components/CallActions";
 import MyButton from "../components/ui/MyButton";
+import VacationLottie from "../assets/lottie/vacation.json";
 
 const CallPage = () => {
   const [callStarted, setCallStarted] = useState(false);
@@ -258,13 +260,18 @@ const CallPage = () => {
   if (!meta.pid || !meta.pname || callEnded || !rtcSocket?.socket) {
     return (
       <div className="h-screen w-full bg-white dark:bg-gray-800">
-        <div className="flex h-screen w-full flex-col items-center justify-center gap-10">
-          <div className="text-2xl font-semibold text-white">
-            <div className="text-blue-700 dark:text-white" onClick={getSocketData}>
-              Call Ended!
-            </div>
+        <div className="flex h-screen w-full flex-col items-center justify-around">
+          <div className="w-[70%] lg:w-[45%] xl:w-[35%] ">
+            <Lottie animationData={VacationLottie} />
           </div>
-          <MyButton onClick={goToHome}>Go To Home</MyButton>
+          <div className="flex flex-col items-center gap-10">
+            <div className="text-2xl font-semibold text-white">
+              <div className="text-blue-700 dark:text-white" onClick={getSocketData}>
+                Call Ended!
+              </div>
+            </div>
+            <MyButton onClick={goToHome}>Go To Home</MyButton>
+          </div>
         </div>
       </div>
     );
