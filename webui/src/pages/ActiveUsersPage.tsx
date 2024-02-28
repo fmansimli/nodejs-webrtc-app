@@ -50,6 +50,7 @@ const ActiveUsersPage = () => {
   useEffect(() => {
     rtcSocket.callIn((user) => {
       callRef.current = true;
+      setRejecter(null);
       setCaller(user);
     });
   }, []);
