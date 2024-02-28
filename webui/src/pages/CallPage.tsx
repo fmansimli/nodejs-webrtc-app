@@ -233,7 +233,7 @@ const CallPage = () => {
 
       rtcSocket.sendRTC(meta.pid, "act", { type: "CALL_ENDED" });
     } catch (error) {
-      console.error("CALL_HANGUP_ERROR:", error);
+      console.error("CALL_HANGUP_ERROR::", error);
     } finally {
       setCallEnded(true);
     }
