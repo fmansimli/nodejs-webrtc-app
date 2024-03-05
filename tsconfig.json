@@ -12,7 +12,7 @@
     "strict": true,
     "skipLibCheck": true,
     "removeComments": true,
-    "declaration": true,
+    "declaration": false,
     "allowJs": true
   },
   "exclude": ["node_modules", "tests", "./webui", "zfolder"]

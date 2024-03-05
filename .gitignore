@@ -135,3 +135,5 @@ dist
 *.d.ts
 
 zfolder
+
+vscode-profile*
